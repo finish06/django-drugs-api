@@ -3,8 +3,6 @@ LABEL maintainer="Caleb Dunn"
 
 ENV PYTHONUNBUFFERED 1
 
-COPY ./drugs.json /drugs.json
-
 COPY ./requirements.txt /requirements.txt
 RUN apk add --update --no-cache postgresql-client jpeg-dev
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
