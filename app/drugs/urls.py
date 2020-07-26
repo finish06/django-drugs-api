@@ -12,4 +12,4 @@ app_name = "drugs"
 
 urlpatterns = [
     path('', include(router.urls))
-] 
+]

@@ -20,6 +20,7 @@ def sample_drug(**params):
 
     return Drug.objects.create(**defaults)
 
+
 class PublicDrugsApiTest(TestCase):
     """Test unauthenticated drugs API access"""
 
@@ -29,9 +30,9 @@ class PublicDrugsApiTest(TestCase):
     def test_create_drug(self):
         """Test the ability to save a drug to the DB"""
         payload = {
-        'generic_name': 'lisinopril',
-        'brand_name': 'zestril',
-        'product_id': '123456'
+            'generic_name': 'lisinopril',
+            'brand_name': 'zestril',
+            'product_id': '123456'
         }
         Drug.objects.create(**payload)
 
@@ -42,7 +43,7 @@ class PublicDrugsApiTest(TestCase):
     def test_retrieve_drugs(self):
         """Test retrieving a drug from the db"""
         sample_drug()
-        
+
         res = self.client.get(DRUGS_URL)
         drug = Drug.objects.all()
         serializer = DrugSerializer(drug, many=True)

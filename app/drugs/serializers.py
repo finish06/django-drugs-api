@@ -4,7 +4,7 @@ from core.models import Drug, Route, MOA
 
 
 class MOASerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = MOA
         fields = ('id', 'moa')
@@ -12,7 +12,7 @@ class MOASerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Route
         fields = ('id', 'route')
@@ -27,5 +27,6 @@ class DrugSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Drug
-        fields = ('id', 'product_id', 'generic_name', 'brand_name', 'routes', 'moa', 'dea_schedule')
+        fields = ('id', 'product_id', 'generic_name',
+                  'brand_name', 'routes', 'moa', 'dea_schedule')
         ready_only_fields = ('id',)

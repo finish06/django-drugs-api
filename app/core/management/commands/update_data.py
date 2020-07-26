@@ -1,9 +1,6 @@
 from datetime import date, timedelta
-import json
 import requests
 
-from django.db import connections
-from django.db.utils import OperationalError
 from django.core.management.base import BaseCommand
 
 from core.models import Drug, Route, MOA
@@ -73,7 +70,8 @@ class Command(BaseCommand):
         self.stdout.write("Loading the database...")
         now = str(date.today().strftime("%Y%m%d"))
         previous = str((date.today() - timedelta(30)).strftime("%Y%m%d"))
-        r = requests.get(f"https://api.fda.gov/drug/ndc.json?search=marketing_start_date:[{previous}+TO+{now}]")
+        r = requests.get(f"https://api.fda.gov/drug/ndc.json?\
+                search=marketing_start_date:[{previous}+TO+{now}]")
         if r.status_code != 200:
             quit()
         else:

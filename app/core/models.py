@@ -1,8 +1,6 @@
-import os
-
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
-                                       PermissionsMixin
+# from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
+#                                        PermissionsMixin
 
 
 class Drug(models.Model):
@@ -17,7 +15,7 @@ class Drug(models.Model):
     def __str__(self):
         return self.generic_name
 
- 
+
 class Route(models.Model):
     """Routes database from OpenFDA data"""
     route = models.CharField(max_length=255)

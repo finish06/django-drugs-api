@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-from rest_framework.response import Response
 
 from drugs import serializers
 
@@ -7,10 +6,10 @@ from core.models import Drug, Route, MOA
 
 
 class RouteViewSet(viewsets.ReadOnlyModelViewSet):
-    
+
     queryset = Route.objects.all()
     serializer_class = (serializers.RouteSerializer)
-    
+
     def get_queryset(self):
         queryset = self.queryset
         route = self.request.query_params.get('route')
@@ -53,8 +52,9 @@ class DrugViewSet(viewsets.ReadOnlyModelViewSet):
             params['routes__route__iexact'] = route
         if product_id:
             params['product_id'] = product_id
-        if generic_name: 
+        if generic_name:
             params['generic_name'] = generic_name
         if brand_name:
             params['brand_name'] = brand_name
-        return self.queryset.filter(**params) # .distinct('generic_name', 'brand_name')
+        return self.queryset.filter(**params)
+        # .distinct('generic_name', 'brand_name')
