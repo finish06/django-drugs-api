@@ -8,12 +8,12 @@ class Drug(models.Model):
     product_id = models.CharField(max_length=255)
     generic_name = models.CharField(max_length=255)
     brand_name = models.CharField(max_length=255)
-    dea_schedule = models.CharField(max_length=255, null=True)
+    dea_schedule = models.CharField(max_length=10, null=True)
     routes = models.ManyToManyField('Route')
     moa = models.ManyToManyField('MOA')
 
     def __str__(self):
-        return self.generic_name
+        return self.product_id + " " + self.generic_name
 
 
 class Route(models.Model):

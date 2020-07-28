@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
@@ -12,7 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('json_file', type=str)
 
     def build_moa_table(self, data_list):
-        self.stdout.write('Building MOA table')
+        self.stdout.write(f'{str(datetime.now())} -- Building MOA table')
         database_moa = set()
         for data in data_list:
             try:
@@ -28,7 +29,7 @@ class Command(BaseCommand):
                 MOA.objects.create(moa=item)
 
     def link_drug_moa(self, data_list):
-        self.stdout.write("Linking MOA to drug table")
+        self.stdout.write(f'{str(datetime.now())} -- Linking MOA to drug table')
         for data in data_list:
             d = Drug.objects.get(
                 product_id=data.get('product_id', ""))
@@ -42,7 +43,7 @@ class Command(BaseCommand):
                     self.stdout.write("Invalid MOA link:" + str(err))
 
     def build_routes_table(self, data_list):
-        self.stdout.write('Building routes table')
+        self.stdout.write(f'{str(datetime.now())} -- Building routes table')
         database_routes = set()
         for data in data_list:
             try:
@@ -57,17 +58,21 @@ class Command(BaseCommand):
                 Route.objects.create(route=item)
 
     def link_drug_routes(self, data_list):
-        self.stdout.write('Linking routes to drug table')
+        self.stdout.write(f'{str(datetime.now())} -- Linking routes to drug table')
         for data in data_list:
-            d = Drug.objects.get(
-                product_id=data.get('product_id', ""))
+            try:
+                d = Drug.objects.get(
+                    product_id=data.get('product_id', ""))
+            except Exception as err:
+                self.stdout.write(f"{str(datetime.now())} -- Product ID does not exist")
+                continue
             if d:
                 try:
                     for route in data.get('route', []):
                         r = Route.objects.get(route=route)
                         d.routes.add(r.id)
                 except Exception as err:
-                    self.stdout.write("Invalid route link:" + str(err))
+                    self.stdout.write("Invalid Route link:" + str(err))
 
     def handle(self, *args, **options):
         self.stdout.write("Loading the database...")
@@ -78,25 +83,34 @@ class Command(BaseCommand):
         self.build_moa_table(data_list['results'])
 
         database_drugs = []
-        self.stdout.write("Building drugs table")
+        new_data = []
+        self.stdout.write(f'{str(datetime.now())} -- Building drugs table')
         for data in data_list['results']:
             try:
                 product_id = data.get('product_id', "").lower()[:254]
-                if Drug.objects.filter(product_id=product_id).exists():
-                    continue
                 generic_name = data.get('generic_name', "").lower()[:254]
                 brand_name = data.get('brand_name', "").lower()[:254]
+                dea_schedule = data.get('dea_schedule', "legend")
+                if generic_name in brand_name:
+                    continue
+                if Drug.objects.filter(product_id=product_id).exists():
+                    continue
                 drug = Drug(product_id=product_id,
                             generic_name=generic_name,
-                            brand_name=brand_name)
+                            brand_name=brand_name,
+                            dea_schedule=dea_schedule)
                 if product_id:
                     database_drugs.append(drug)
+                    new_data.append(data)
+                else:
+                    self.stdout.write(f'{generic_name.capitalize()} does not have a product ID')
             except Exception as err:
                 self.stdout.write('Invalid drug structure' + str(err))
                 continue
+        self.stdout.write(f'{str(datetime.now())} -- Bulk inserting drugs table')
         Drug.objects.bulk_create(database_drugs)
 
-        self.link_drug_routes(data_list['results'])
-        self.link_drug_moa(data_list['results'])
+        self.link_drug_routes(new_data)
+        self.link_drug_moa(new_data)
 
-        self.stdout.write("Database load complete")
+        self.stdout.write(f'{str(datetime.now())} -- Database load complete')

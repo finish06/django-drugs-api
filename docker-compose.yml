@@ -17,8 +17,10 @@ services:
         environment:
             - DB_HOST=drugs_db
             - DB_NAME=app
-            - DB_USER=postgres
-            - DB_PASS=supersecret
+            - DB_USER=${DB_USER}
+            - DB_PASS=${DB_PASS}
+            - IP_ADDR=${IP_ADDR}
+            - SECRET_KEY=${SECRET_KEY}
         depends_on:
             - drugs_db
 
@@ -26,5 +28,5 @@ services:
         image: postgres:10-alpine
         environment:
             - POSTGRES_DB=app
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=supersecret 
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PASS}
