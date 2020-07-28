@@ -7,11 +7,12 @@ class ModelTest(TestCase):
     def test_create_drug_successful(self):
         """Test successful creation of a new drug"""
         drug = models.Drug.objects.create(
+            product_id='12345',
             generic_name="lisinopril",
             brand_name="Zestril"
         )
 
-        self.assertEqual(str(drug), drug.generic_name)
+        self.assertEqual(str(drug), f"{drug.product_id} {drug.generic_name}")
 
     def test_create_route_successful(self):
         """Test successful creation of a new route"""
