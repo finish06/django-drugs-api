@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django_restql.mixins import DynamicFieldsMixin
 
 from core.models import Drug, Route, MOA
 
@@ -19,7 +20,7 @@ class RouteSerializer(serializers.ModelSerializer):
         ready_only_fields = ('id',)
 
 
-class DrugSerializer(serializers.ModelSerializer):
+class DrugSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     """Serializer for drug object"""
 
     moa = MOASerializer(many=True, read_only=True)
