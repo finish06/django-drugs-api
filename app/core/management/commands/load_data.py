@@ -87,31 +87,25 @@ class Command(BaseCommand):
 
         database_drugs = []
         new_data = []
-        brands = []
         self.stdout.write(f'{str(datetime.now())} -- Building drugs table')
         for data in data_list['results']:
             try:
                 product_id = data.get('product_id', "").lower()[:254]
+                product_ndc = data.get('product_ndc', "").lower()[:13]
+                start_date = data.get('marketing_start_date', "").lower()[:8]
+                end_date = data.get('listing_expiration_date', "").lower()[:8]
                 generic_name = data.get('generic_name', "").lower()[:254]
                 brand_name = data.get('brand_name', "").capitalize()[:254]
-                dea_schedule = data.get('dea_schedule', "unknown")
-                if generic_name in brand_name.lower():
-                    continue
-                if Drug.objects.filter(brand_name=brand_name).exists():
-                    continue
-                if brand_name in brands:
-                    continue
+                dea_schedule = data.get('dea_schedule', "Legend")
                 drug = Drug(product_id=product_id,
+                            product_ndc=product_ndc,
+                            start_date=start_date,
+                            end_date=end_date,
                             generic_name=generic_name,
                             brand_name=brand_name,
                             dea_schedule=dea_schedule)
-                if brand_name:
-                    brands.append(brand_name)
-                    database_drugs.append(drug)
-                    new_data.append(data)
-                else:
-                    self.stdout.write(f'{generic_name.capitalize()} '
-                                      'does not have a brand name')
+                database_drugs.append(drug)
+                new_data.append(data)
             except Exception as err:
                 self.stdout.write('Invalid drug structure' + str(err))
                 continue

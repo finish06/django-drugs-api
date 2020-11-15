@@ -69,38 +69,53 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Loading the database...")
         now = str(date.today().strftime("%Y%m%d"))
-        previous = str((date.today() - timedelta(30)).strftime("%Y%m%d"))
-        r = requests.get(f"https://api.fda.gov/drug/ndc.json?\
-                search=marketing_start_date:[{previous}+TO+{now}]")
-        if r.status_code != 200:
-            quit()
-        else:
-            data_list = r.json()
+        previous = str((date.today() - timedelta(120)).strftime("%Y%m%d"))
+        url = f"https://api.fda.gov/drug/ndc.json?search=marketing_start_date:[{previous}+TO+{now}]&limit=100"
+        while True:
+            r = requests.get(url)
+            link = r.links
+            if r.status_code != 200:
+                quit()
+            else:
+                data_list = r.json()
+        
+            self.build_routes_table(data_list['results'])
+            self.build_moa_table(data_list['results'])
 
-        self.build_routes_table(data_list['results'])
-        self.build_moa_table(data_list['results'])
+            database_drugs = []
+            self.stdout.write("Building drugs table")
+            for data in data_list['results']:
+                try:
+                    product_id = data.get('product_id', "").lower()[:254]
+                    if Drug.objects.filter(product_id=product_id).exists():
+                        self.stdout.write("Drug exists: " + product_id)
+                        continue
+                    product_ndc = data.get('product_ndc', "").lower()[:13]
+                    start_date = data.get('marketing_start_date', "").lower()[:8]
+                    end_date = data.get('listing_expiration_date', "").lower()[:8]
+                    generic_name = data.get('generic_name', "").lower()[:254]
+                    brand_name = data.get('brand_name', "").capitalize()[:254]
+                    dea_schedule = data.get('dea_schedule', "Legend")
+                    drug = Drug(product_id=product_id,
+                                product_ndc=product_ndc,
+                                start_date=start_date,
+                                end_date=end_date,
+                                generic_name=generic_name,
+                                brand_name=brand_name,
+                                dea_schedule=dea_schedule)
+                    if product_id:
+                        database_drugs.append(drug)
+                except Exception as err:
+                    self.stdout.write('Invalid drug structure' + str(err))
+            Drug.objects.bulk_create(database_drugs)
 
-        database_drugs = []
-        self.stdout.write("Building drugs table")
-        for data in data_list['results']:
-            try:
-                product_id = data.get('product_id', "").lower()[:254]
-                self.stdout.write(product_id)
-                if Drug.objects.filter(product_id=product_id).exists():
-                    self.stdout.write("Drug exists")
-                    continue
-                generic_name = data.get('generic_name', "").lower()[:254]
-                brand_name = data.get('brand_name', "").capitalize()[:254]
-                drug = Drug(product_id=product_id,
-                            generic_name=generic_name,
-                            brand_name=brand_name)
-                if product_id:
-                    database_drugs.append(drug)
-            except Exception as err:
-                self.stdout.write('Invalid drug structure' + str(err))
-        Drug.objects.bulk_create(database_drugs)
+            self.link_drug_routes(data_list['results'])
+            self.link_drug_moa(data_list['results'])
 
-        self.link_drug_routes(data_list['results'])
-        self.link_drug_moa(data_list['results'])
+            if link:
+                url = link['next']['url']
+            else:
+                self.stdout.write("Completed entire list")
+                break
 
         self.stdout.write("Database load complete")
