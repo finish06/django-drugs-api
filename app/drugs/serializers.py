@@ -23,8 +23,8 @@ class RouteSerializer(serializers.ModelSerializer):
 class DrugSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     """Serializer for drug object"""
 
-    moa = MOASerializer(many=True, read_only=True)
-    routes = RouteSerializer(many=True, read_only=True)
+    # moa = MOASerializer(many=True, read_only=True)
+    # routes = RouteSerializer(many=True, read_only=True)
 
     class Meta:
         model = Drug
