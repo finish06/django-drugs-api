@@ -29,8 +29,8 @@ class Command(BaseCommand):
                 MOA.objects.create(moa=item)
 
     def link_drug_moa(self, data_list):
-        self.stdout.write(f'{str(datetime.now())} -- ' \
-                            'Linking MOA to drug table')
+        self.stdout.write(f'{str(datetime.now())} -- '
+                          'Linking MOA to drug table')
         for data in data_list:
             d = Drug.objects.get(
                 product_id=data.get('product_id', ""))
@@ -59,8 +59,8 @@ class Command(BaseCommand):
                 Route.objects.create(route=item)
 
     def link_drug_routes(self, data_list):
-        self.stdout.write(f'{str(datetime.now())} -- ' \
-                            'Linking routes to drug table')
+        self.stdout.write(f'{str(datetime.now())} -- '
+                          'Linking routes to drug table')
         for data in data_list:
             try:
                 d = Drug.objects.get(
@@ -110,13 +110,13 @@ class Command(BaseCommand):
                     database_drugs.append(drug)
                     new_data.append(data)
                 else:
-                    self.stdout.write(f'{generic_name.capitalize()} ' \
-                        'does not have a brand name')
+                    self.stdout.write(f'{generic_name.capitalize()} '
+                                      'does not have a brand name')
             except Exception as err:
                 self.stdout.write('Invalid drug structure' + str(err))
                 continue
-        self.stdout.write(f'{str(datetime.now())} -- ' \
-                            'Bulk inserting drugs table')
+        self.stdout.write(f'{str(datetime.now())} -- '
+                          'Bulk inserting drugs table')
         Drug.objects.bulk_create(database_drugs)
 
         self.link_drug_routes(new_data)
