@@ -28,6 +28,7 @@ class DrugSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Drug
-        fields = ('id', 'product_id', 'generic_name',
-                  'brand_name', 'routes', 'moa', 'dea_schedule')
+        fields = ('id', 'product_id', 'product_ndc', 'start_date',
+                  'end_date', 'generic_name', 'brand_name',
+                  'routes', 'moa', 'dea_schedule')
         ready_only_fields = ('id',)
