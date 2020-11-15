@@ -29,8 +29,8 @@ class Command(BaseCommand):
                 MOA.objects.create(moa=item)
 
     def link_drug_moa(self, data_list):
-        self.stdout.write(f'{str(datetime.now())} -- \
-                            Linking MOA to drug table')
+        self.stdout.write(f'{str(datetime.now())} -- ' \
+                            'Linking MOA to drug table')
         for data in data_list:
             d = Drug.objects.get(
                 product_id=data.get('product_id', ""))
@@ -59,15 +59,15 @@ class Command(BaseCommand):
                 Route.objects.create(route=item)
 
     def link_drug_routes(self, data_list):
-        self.stdout.write(f'{str(datetime.now())} -- \
-                            Linking routes to drug table')
+        self.stdout.write(f'{str(datetime.now())} -- ' \
+                            'Linking routes to drug table')
         for data in data_list:
             try:
                 d = Drug.objects.get(
                     product_id=data.get('product_id', ""))
             except Exception as err:
-                self.stdout.write(f"{str(datetime.now())} -- \
-                                    Product ID does not exist: {err}")
+                self.stdout.write(f"{str(datetime.now())} -- ' \
+                                    'Product ID does not exist: {err}")
                 continue
             if d:
                 try:
@@ -87,32 +87,36 @@ class Command(BaseCommand):
 
         database_drugs = []
         new_data = []
+        brands = []
         self.stdout.write(f'{str(datetime.now())} -- Building drugs table')
         for data in data_list['results']:
             try:
                 product_id = data.get('product_id', "").lower()[:254]
                 generic_name = data.get('generic_name', "").lower()[:254]
-                brand_name = data.get('brand_name', "").lower()[:254]
-                dea_schedule = data.get('dea_schedule', "legend")
-                if generic_name in brand_name:
+                brand_name = data.get('brand_name', "").capitalize()[:254]
+                dea_schedule = data.get('dea_schedule', "unknown")
+                if generic_name in brand_name.lower():
                     continue
-                if Drug.objects.filter(product_id=product_id).exists():
+                if Drug.objects.filter(brand_name=brand_name).exists():
+                    continue
+                if brand_name in brands:
                     continue
                 drug = Drug(product_id=product_id,
                             generic_name=generic_name,
                             brand_name=brand_name,
                             dea_schedule=dea_schedule)
-                if product_id:
+                if brand_name:
+                    brands.append(brand_name)
                     database_drugs.append(drug)
                     new_data.append(data)
                 else:
-                    self.stdout.write(f'{generic_name.capitalize()}\
-                                        does not have a product ID')
+                    self.stdout.write(f'{generic_name.capitalize()} ' \
+                        'does not have a brand name')
             except Exception as err:
                 self.stdout.write('Invalid drug structure' + str(err))
                 continue
-        self.stdout.write(f'{str(datetime.now())} -- \
-                            Bulk inserting drugs table')
+        self.stdout.write(f'{str(datetime.now())} -- ' \
+                            'Bulk inserting drugs table')
         Drug.objects.bulk_create(database_drugs)
 
         self.link_drug_routes(new_data)

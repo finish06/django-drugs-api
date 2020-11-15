@@ -1,5 +1,5 @@
-from datetime import date, timedelta
 import requests
+from datetime import date, timedelta, datetime
 
 from django.core.management.base import BaseCommand
 
@@ -10,16 +10,16 @@ class Command(BaseCommand):
     """Django command to load the database"""
 
     def build_moa_table(self, data_list):
-        self.stdout.write('Building MOA table')
+        self.stdout.write(f'{str(datetime.now())} -- Building MOA table')
         database_moa = set()
         for data in data_list:
             try:
                 for moa in data.get('pharm_class', []):
                     if 'MoA' in moa:
-                        database_moa.add(moa)
+                        database_moa.add(moa[:-6])
             except Exception as err:
                 self.stdout.write('Invalid MoA structure:' + str(err))
-                pass
+                continue
         for item in database_moa:
             exists = MOA.objects.filter(moa=item).exists()
             if not exists:
@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 try:
                     for moa in data.get('pharm_class', []):
                         if 'MoA' in moa:
-                            m = MOA.objects.get(moa=moa)
+                            m = MOA.objects.get(moa=moa[:-6])
                             d.moa.add(m.id)
                 except Exception as err:
                     self.stdout.write("Invalid MOA link:" + str(err))
@@ -90,7 +90,7 @@ class Command(BaseCommand):
                     self.stdout.write("Drug exists")
                     continue
                 generic_name = data.get('generic_name', "").lower()[:254]
-                brand_name = data.get('brand_name', "").lower()[:254]
+                brand_name = data.get('brand_name', "").capitalize()[:254]
                 drug = Drug(product_id=product_id,
                             generic_name=generic_name,
                             brand_name=brand_name)
