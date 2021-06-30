@@ -49,7 +49,7 @@ class PublicDrugsApiTest(TestCase):
         serializer = DrugSerializer(drug, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_retrieve_drug_filter_generic(self):
         """Test the ability to filter to select generics"""
@@ -65,8 +65,8 @@ class PublicDrugsApiTest(TestCase):
         serializer1 = DrugSerializer(drug1)
         serializer2 = DrugSerializer(drug2)
 
-        self.assertIn(serializer1.data, res.data)
-        self.assertNotIn(serializer2, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertNotIn(serializer2, res.data['results'])
 
     def test_retrieve_drug_filter_brand(self):
         """Test the ability to filter to select brands"""
@@ -81,8 +81,8 @@ class PublicDrugsApiTest(TestCase):
         serializer1 = DrugSerializer(drug1)
         serializer2 = DrugSerializer(drug2)
 
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer1, res.data)
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer1, res.data['results'])
 
     def test_retrieve_drug_filter_product_id(self):
         """Test the ability to filter to product ID"""
@@ -98,5 +98,5 @@ class PublicDrugsApiTest(TestCase):
         serializer1 = DrugSerializer(drug1)
         serializer2 = DrugSerializer(drug2)
 
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer1, res.data)
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer1, res.data['results'])
