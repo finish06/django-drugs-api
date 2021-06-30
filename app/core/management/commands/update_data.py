@@ -70,7 +70,7 @@ class Command(BaseCommand):
         self.stdout.write("Loading the database...")
         now = str(date.today().strftime("%Y%m%d"))
         previous = str((date.today() - timedelta(120)).strftime("%Y%m%d"))
-        url = f"https://api.fda.gov/drug/ndc.json?search=marketing_start_date:[{previous}+TO+{now}]&limit=100"
+        url = f"https://api.fda.gov/drug/ndc.json?search=marketing_start_date:[{previous}+TO+{now}]&limit=100"  # noqa: E501
         while True:
             r = requests.get(url)
             link = r.links
@@ -78,7 +78,7 @@ class Command(BaseCommand):
                 quit()
             else:
                 data_list = r.json()
-        
+
             self.build_routes_table(data_list['results'])
             self.build_moa_table(data_list['results'])
 
@@ -91,8 +91,8 @@ class Command(BaseCommand):
                         self.stdout.write("Drug exists: " + product_id)
                         continue
                     product_ndc = data.get('product_ndc', "").lower()[:13]
-                    start_date = data.get('marketing_start_date', "").lower()[:8]
-                    end_date = data.get('listing_expiration_date', "").lower()[:8]
+                    start_date = data.get('marketing_start_date', "").lower()[:8]  # noqa: E501
+                    end_date = data.get('listing_expiration_date', "").lower()[:8]  # noqa: E501
                     generic_name = data.get('generic_name', "").lower()[:254]
                     brand_name = data.get('brand_name', "").capitalize()[:254]
                     dea_schedule = data.get('dea_schedule', "Legend")
