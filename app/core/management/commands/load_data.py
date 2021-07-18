@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-from core.models import Drug, Route, MOA
+from core.models import Generic, Drug, Route, MOA
 
 
 class Command(BaseCommand):
@@ -77,6 +77,29 @@ class Command(BaseCommand):
                 except Exception as err:
                     self.stdout.write("Invalid Route link:" + str(err))
 
+    def build_generics_table(self, data_list):
+        self.stdout.write(f'{str(datetime.now())} -- Building generics table')
+        database_generics = set()
+        for data in data_list:
+            try:
+                generic_name = data.get('generic_name', "")
+                database_generics.add(generic_name.lower()[:254])
+            except Exception as err:
+                self.stdout.write(f'{str(datetime.now())} -- '
+                                  f'Generic name does not exist: {err}')
+                continue
+        objs = [
+            Generic(
+                generic_name=item
+            )
+            for item in database_generics
+        ]
+        Generic.objects.bulk_create(objs=objs)
+        # for item in database_generics:
+        #     exists = Generic.objects.filter(generic_name=item).exists()
+        #     if not exists:
+        #         Generic.objects.create(generic_name=item)
+
     def handle(self, *args, **options):
         self.stdout.write("Loading the database...")
         with open(options['json_file']) as f:
@@ -84,6 +107,7 @@ class Command(BaseCommand):
 
         self.build_routes_table(data_list['results'])
         self.build_moa_table(data_list['results'])
+        self.build_generics_table(data_list['results'])
 
         database_drugs = []
         new_data = []
@@ -94,20 +118,22 @@ class Command(BaseCommand):
                 product_ndc = data.get('product_ndc', "").lower()[:13]
                 start_date = data.get('marketing_start_date', "").lower()[:8]
                 end_date = data.get('listing_expiration_date', "").lower()[:8]
-                generic_name = data.get('generic_name', "").lower()[:254]
+                generic_name = data.get('generic_name', "")
+                generic_obj = Generic.objects.get(
+                        generic_name=generic_name.lower()[:254])
                 brand_name = data.get('brand_name', "").capitalize()[:254]
                 dea_schedule = data.get('dea_schedule', "Legend")
                 drug = Drug(product_id=product_id,
                             product_ndc=product_ndc,
                             start_date=start_date,
                             end_date=end_date,
-                            generic_name=generic_name,
+                            generic_name=generic_obj,
                             brand_name=brand_name,
                             dea_schedule=dea_schedule)
                 database_drugs.append(drug)
                 new_data.append(data)
             except Exception as err:
-                self.stdout.write('Invalid drug structure' + str(err))
+                self.stdout.write('Invalid drug structure -- ' + str(err))
                 continue
         self.stdout.write(f'{str(datetime.now())} -- '
                           'Bulk inserting drugs table')

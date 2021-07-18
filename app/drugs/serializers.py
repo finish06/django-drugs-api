@@ -1,7 +1,15 @@
 from rest_framework import serializers
 from django_restql.mixins import DynamicFieldsMixin
 
-from core.models import Drug, Route, MOA
+from core.models import Generic, Drug, Route, MOA
+
+
+class GenericSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Generic
+        fields = ('id', 'generic_name')
+        read_only_fields = ('id',)
 
 
 class MOASerializer(serializers.ModelSerializer):

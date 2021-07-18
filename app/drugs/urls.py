@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from drugs import views
 
 router = DefaultRouter()
+router.register('generics', views.GenericViewSet)
 router.register('drugs', views.DrugViewSet)
 router.register('routes', views.RouteViewSet)
 router.register('moa', views.MoaViewSet)

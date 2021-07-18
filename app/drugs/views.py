@@ -2,7 +2,20 @@ from rest_framework import viewsets
 
 from drugs import serializers
 
-from core.models import Drug, Route, MOA
+from core.models import Generic, Drug, Route, MOA
+
+
+class GenericViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset = Generic.objects.all()
+    serializer_class = (serializers.GenericSerializer)
+
+    def get_queryset(self):
+        queryset = self.queryset
+        generic = self.request.query_params.get('generic')
+        if generic:
+            queryset = Generic.objects.filter(generic=generic)
+        return queryset
 
 
 class RouteViewSet(viewsets.ReadOnlyModelViewSet):
@@ -53,7 +66,7 @@ class DrugViewSet(viewsets.ReadOnlyModelViewSet):
         if product_id:
             params['product_id'] = product_id
         if generic_name:
-            params['generic_name'] = generic_name
+            params['generic_name__generic_name__iexact'] = generic_name
         if brand_name:
             params['brand_name'] = brand_name
         return self.queryset.filter(**params)

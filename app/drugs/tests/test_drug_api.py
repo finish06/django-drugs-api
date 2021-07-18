@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.models import Drug
+from core.models import Generic, Drug
 
 from drugs.serializers import DrugSerializer
 
@@ -12,8 +12,12 @@ DRUGS_URL = reverse('drugs:drug-list')
 
 def sample_drug(**params):
     """Create a sample drug to load into the DB"""
+    generic = Generic.objects.create(
+        generic_name='lisinopril'
+    )
+
     defaults = {
-        'generic_name': 'lisinopril',
+        'generic_name': generic,
         'brand_name': 'zestril'
     }
     defaults.update(params)
@@ -29,8 +33,11 @@ class PublicDrugsApiTest(TestCase):
 
     def test_create_drug(self):
         """Test the ability to save a drug to the DB"""
+        generic = Generic.objects.create(
+            generic_name='lisinopril'
+        )
         payload = {
-            'generic_name': 'lisinopril',
+            'generic_name': generic,
             'brand_name': 'zestril',
             'product_id': '123456'
         }
@@ -54,8 +61,11 @@ class PublicDrugsApiTest(TestCase):
     def test_retrieve_drug_filter_generic(self):
         """Test the ability to filter to select generics"""
         drug1 = sample_drug()
+        drug2_generic = Generic.objects.create(
+            generic_name='metoprolol'
+        )
         drug2 = sample_drug(
-            generic_name='metoprolol',
+            generic_name=drug2_generic,
             brand_name='lopressor',
             product_id="345678"
         )
@@ -71,8 +81,11 @@ class PublicDrugsApiTest(TestCase):
     def test_retrieve_drug_filter_brand(self):
         """Test the ability to filter to select brands"""
         drug1 = sample_drug()
+        drug2_generic = Generic.objects.create(
+            generic_name='metoprolol'
+        )
         drug2 = sample_drug(
-            generic_name='metoprolol',
+            generic_name=drug2_generic,
             brand_name='lopressor'
         )
 
@@ -87,8 +100,11 @@ class PublicDrugsApiTest(TestCase):
     def test_retrieve_drug_filter_product_id(self):
         """Test the ability to filter to product ID"""
         drug1 = sample_drug()
+        drug2_generic = Generic.objects.create(
+            generic_name='metoprolol'
+        )
         drug2 = sample_drug(
-            generic_name='metoprolol',
+            generic_name=drug2_generic,
             brand_name='lopressor',
             product_id="345678"
         )
